@@ -1,0 +1,140 @@
+services:
+
+  spark-master:
+
+    image: spark:3.5.1-python3
+    container_name: spark-master
+    command: [
+      "/opt/spark/bin/spark-class",
+      "org.apache.spark.deploy.master.Master",
+      "--host", "spark-master",
+      "--port", "7077",
+      "--webui-port", "8080"
+    ]
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_HOST=spark-master
+    ports:
+      - "8081:8080"
+      - "7077:7077"
+    volumes:
+      - spark_data:/opt/spark-data
+    networks:
+      - stock_data
+
+# SPARK_WORKER
+
+  spark-worker:
+    image: spark:3.5.1-python3
+    container_name: spark-worker
+    command: [
+      "/opt/spark/bin/spark-class",
+      "org.apache.spark.deploy.worker.Worker",
+      "spark://spark-master:7077",
+      "--webui-port", "8081"
+    ]
+    environment:
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+    depends_on:
+      - spark-master
+    volumes:
+      - spark_data:/opt/spark-data
+    networks:
+      - stock_data
+
+
+# KAFKA
+  kafka:
+    image: confluentinc/cp-kafka:7.4.10   # Use the Confluent Kafka image (version 7.4.10)
+    container_name: kafka                 # Explicit container name for easier reference
+    hostname: kafka                       # Hostname used inside Docker network
+    ports:
+      - "9092:9092"                       # Internal listener for Docker containers
+      - "9094:9094"                       # External listener for local host (Python clients)
+    environment:
+      KAFKA_KRAFT_MODE: "true"                           # Enable KRaft mode (no Zookeeper)
+      KAFKA_PROCESS_ROLES: controller,broker             # Kafka acts as both controller and broker
+      KAFKA_NODE_ID: 1                                   # Unique ID for this Kafka node
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"     # Define controller voters (only one here)
+      # Define all listener endpoints and ports
+      KAFKA_LISTENERS: PLAINTEXT_INTERNAL://kafka:9092,PLAINTEXT_EXTERNAL://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL      # Brokers communicate via internal listener
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER               # Controller listener name
+
+      # Tell Kafka how it should advertise itself to clients
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://kafka:9092,PLAINTEXT_EXTERNAL://localhost:9094
+
+      KAFKA_LOG_DIRS: /var/lib/kafka/data                       # Directory for Kafka logs (message data)
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"                   # Allow automatic topic creation
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1                 # Replication factor = 1 since single broker
+      KAFKA_LOG_RETENTION_HOURS: 168                            # Keep messages for 7 days
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0                 # No delay before consumer group rebalancing
+      CLUSTER_ID: "0CXMeecZTPG76Lp7vlcTTw"                      # Unique cluster ID for KRaft mode
+    volumes:
+      - kafka_data:/var/lib/kafka/data                          # Persist Kafka message data
+    networks:
+      - stock_data                                              # Attach Kafka to the stock_data network
+
+
+#KAFKA UI
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:v0.7.2
+    ports:
+      - 8085:8080
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    networks:
+      - stock_data
+
+  postgres: 
+    image: debezium/postgres:17
+    container_name: postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: stock_data
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgres/data
+    networks:
+      - stock_data
+  
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - stock_data
+
+# Volume & Networks 
+
+volumes:
+  spark_data:    # Named volume for Spark to persist logs/data
+  kafka_data:    # Named volume for Kafka log and topic data
+  ivy_cache:     # Named volume for pyspark installed packages
+  postgres_data: # Named volume for Postgres data
+
+networks:
+  stock_data:    # Shared network for containers communication
+
+
+
+
+
+
