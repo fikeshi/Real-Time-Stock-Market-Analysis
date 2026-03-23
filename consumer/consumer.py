@@ -80,7 +80,7 @@ query = (
     processed_df.writeStream
     .foreachBatch(write_to_postgres) #use foreachBatch for JDBC sinks
     .option("checkpointLocation", checkpoint_dir) #directory where spark will store its
-    .OutputMode('append')
+    .outputMode('append')
     .start()
 )
 #wait for a manual termination of the  pipeline
