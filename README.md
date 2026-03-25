@@ -9,7 +9,7 @@ This project implements an end-to-end real-time data pipeline for stock market a
 Every component runs inside Docker containers, making the entire stack reproducible with a single docker compose up command. 
 
 ### Data Pipeline Architecture
-![Data pipeline Architecture](./img/pipeline_architecture.drawio%20copy.svg)
+![Data pipeline Architecture](img/pipeline_architecture.svg)
 
 ### Project Setup Guide
 This guide will walk you through setting up the project environment including repository setup.
@@ -90,8 +90,7 @@ Username: admin
 Password: admin
 ```
 
-4. Select the relevant table(s) and load the data
-5. 
+4. Select the relevant table and load the data
 
 ## Docker Compose Common Commands
 
