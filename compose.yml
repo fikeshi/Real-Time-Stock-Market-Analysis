@@ -1,3 +1,4 @@
+# # Containerised stock data streaming pipeline, each service runs in its own Docker container, isolating dependencies and ensuring the full stack spins up consistently with a single 'docker compose up'.
 services:
 
   spark-master:

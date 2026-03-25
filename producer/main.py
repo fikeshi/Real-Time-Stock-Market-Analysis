@@ -1,7 +1,13 @@
+# Entry point for the stock data pipeline.
+# Fetches stock data from the API and publishes each record to a Kafka topic.
+
 from extract import connect_to_api, extract_json
 from producer_setup import init_producer, topic
 import time
 
+
+
+#Fetches stock data from the API and stream each record to a Kafka topic
 def main():
     response = connect_to_api()
 
@@ -11,6 +17,7 @@ def main():
 
 
     for stock in data:
+        # Select only the fields we want to, drop any extra API fields.
         result = {
             'date': stock['date'],
             'symbol': stock['symbol'],

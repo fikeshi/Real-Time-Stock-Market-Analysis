@@ -3,6 +3,12 @@ from config import  logger, headers, url
 
 
 def connect_to_api():
+	"""
+    Fetches intraday (5min) time series data for each stock symbol.
+    Returns a list of raw JSON responses, one per stock.
+    Skips a stock on request failure rather than aborting the whole run.
+    """
+
 	stocks = ['TSLA','MSFT','GOOGL']
 	json_response = []
 
@@ -31,7 +37,7 @@ def connect_to_api():
 
 
 
-	
+#Append raw API responses into a list ofrecords
 def extract_json(response):
 	records=[]
 	for data in response: 

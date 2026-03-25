@@ -1,4 +1,4 @@
-#python script to consumer data form kafka cluster 
+#python script to consumer data from kafka cluster for local development and testing only. In production all consumption is handled by the PySpark Structured Streaming job inside Docker. This was only used to test before pyspark consumer was configured
 
 from kafka import KafkaConsumer
 import json
