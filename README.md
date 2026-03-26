@@ -9,7 +9,7 @@ This project implements an end-to-end real-time data pipeline for stock market a
 Every component runs inside Docker containers, making the entire stack reproducible with a single docker compose up command. 
 
 ### Data Pipeline Architecture
-![Data pipeline Architecture](img/pipeline_architecture.svg)
+![Data pipeline Architecture](./img/pipeline_architecture.png)
 
 ### Project Setup Guide
 This guide will walk you through setting up the project environment including repository setup.
@@ -91,6 +91,19 @@ Password: admin
 ```
 
 4. Select the relevant table and load the data
+
+### Dashboard Preview
+![Stock Market Dashboard](./img/stock%20market%20dashboard.png)
+
+The dashboard provides the following views:
+- **Average Close Price Movement Over Time** — line chart tracking TSLA, MSFT and GOOGL across 5-minute intervals
+- **Average Close** — aggregated close price across all selected symbols
+- **High of Day / Low of Day** — intraday price range summary cards
+- **Raw Data Table** — granular view of all ingested records including open, high, low and close per interval
+
+> The dashboard includes a slicer to filter by individual stock symbol (TSLA, MSFT, GOOGL).
+
+
 
 ## Docker Compose Common Commands
 
@@ -296,12 +309,12 @@ The following fields are extracted from the Alpha Vantage API response and store
 
 | Column Name       | Data Type | Description                                      | Example               |
 |-------------------|-----------|--------------------------------------------------|-----------------------|
-| `symbol`          | VARCHAR   | Stock ticker symbol                              | `AAPL`                |
-| `date`            | VARCHAR   | Timestamp of the 5-minute interval               | `2024-11-15 14:25:00` |
-| `open`            | FLOAT     | Opening price for the 5-minute interval          | `172.34`              |
-| `close`           | FLOAT     | Closing price for the 5-minute interval          | `173.10`              |
-| `high`            | FLOAT     | Highest price during the interval                | `174.10`              |
-| `low`             | FLOAT     | Lowest price during the interval                 | `171.50`              |
+| `symbol`          | VARCHAR   | Stock ticker symbol                              | `TSLA`                |
+| `date`            | TIMESTAMP | Timestamp of the 5-minute interval               | `2026-03-24 11:40:00` |
+| `open`            | FLOAT     | Opening price for the interval                   | `384.13`              |
+| `close`           | FLOAT     | Closing price for the interval                   | `384.01`              |
+| `high`            | FLOAT     | Highest price during the interval                | `384.36`              |
+| `low`             | FLOAT     | Lowest price during the interval                 | `383.60`              |
 
 
 

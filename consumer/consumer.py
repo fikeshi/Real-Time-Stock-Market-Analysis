@@ -69,7 +69,7 @@ def write_to_postgres(batch_df, batch_id):
     """
     Writes a microbatch dataframe to postgres using JDBC in 'append' mode
     """
-    batch_df.write \
+    batch_df.dropDuplicates(["date", "symbol"]).write \
         .format('jdbc') \
         .mode('append') \
         .options(**postgres_config) \
